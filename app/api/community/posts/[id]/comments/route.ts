@@ -7,7 +7,7 @@ import Comment from '@/lib/models/Comment'
 
 export async function POST(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions)
@@ -18,6 +18,8 @@ export async function POST(
                 { status: 401 }
             )
         }
+
+        const params = await context.params
 
         await connectDB()
 
@@ -84,10 +86,12 @@ export async function POST(
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
         await connectDB()
+
+        const params = await context.params
 
         const comments = await Comment.find({ post: params.id, parentComment: null })
             .sort({ createdAt: -1 })
